@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>내 문장 모음</title>
+<style>
+  /* 시안 B "종이 노트" + 고딕체. 색상 테마 5종은 popup.js 가 --paper/--hl/--stripe/--accent 를 바꿈 */
+  :root {
+    color-scheme: light;
+    --paper: #fbf7ef; --hl: #fde68a; --stripe: #d9b44a; --accent: #7a5d1e;
+    --ink: #2f271d; --near: #c2410c; --full: #b42318; --full-bg: #fbf0e6; --ok: #2f6b2f;
+    --line: rgba(47,39,29,.14);
+    --font: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--paper); color: var(--ink); }
+  body { width: 360px; font-family: var(--font); font-size: 13px; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  [hidden] { display: none !important; }
+
+  .p-hd { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 12px 14px 10px; border-bottom: 2px solid var(--ink); }
+  .p-title { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .p-hd h1 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; }
+  .seg { display: flex; background: color-mix(in srgb, var(--stripe) 22%, #fff); border-radius: 99px; padding: 2px; }
+  .seg button { border: 0; background: none; border-radius: 99px; padding: 2px 9px; font-size: 11.5px; cursor: pointer; color: var(--ink); white-space: nowrap; }
+  .seg button[aria-checked="true"] { background: var(--ink); color: var(--paper); font-weight: 500; }
+  .p-right { display: flex; align-items: center; gap: 9px; }
+  .cnt { font-size: 12px; color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .cnt.near { color: var(--near); font-weight: 700; }
+  .cnt.full { color: var(--full); font-weight: 700; }
+  .tone-wrap { position: relative; display: flex; }
+  .tone { position: relative; width: 12px; height: 12px; border-radius: 50%; padding: 0; cursor: pointer; border: 1px solid var(--stripe); background: var(--hl);
+          box-shadow: 0 0 0 1.5px var(--paper), 0 0 0 2.5px rgba(47,39,29,.3); }
+  .tone::after { content: ""; position: absolute; inset: -5px; }
+  .tone:hover, .tone[aria-expanded="true"] { box-shadow: 0 0 0 1.5px var(--paper), 0 0 0 3px var(--ink); }
+  .tone-pop { position: absolute; right: -8px; top: calc(100% + 10px); z-index: 5; background: #fff; border: 1px solid var(--line); border-radius: 99px;
+              padding: 7px 9px; box-shadow: 0 6px 18px rgba(47,39,29,.18); }
+  .swatches { display: flex; gap: 8px; }
+  .sw { position: relative; width: 12px; height: 12px; padding: 0; border-radius: 50%; cursor: pointer; border: 1px solid var(--sw-edge); background: var(--sw-fill); }
+  .sw::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; }
+  .sw:hover { transform: scale(1.15); }
+  .sw[aria-checked="true"] { box-shadow: 0 0 0 1.5px #fff, 0 0 0 3px var(--ink); }
+
+  .notice { margin: 10px 14px 0; background: var(--full-bg); border: 1px solid #e9c9a8; border-left: 3px solid var(--full);
+            padding: 8px 10px; font-size: 12px; color: #7a2e12; line-height: 1.55; }
+  .search { display: flex; align-items: center; gap: 6px; margin: 10px 14px 0; background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; }
+  .search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--hl) 70%, transparent); }
+  .search svg { flex: none; color: var(--accent); }
+  .search input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font-size: 12.5px; color: var(--ink); padding: 3px 0; }
+  .search input::placeholder { color: #a89c8a; }
+  .s-count { font-size: 11px; color: var(--accent); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  mark.hit { background: var(--hl); color: inherit; border-radius: 2px; padding: 0 1px; box-shadow: 0 0 0 1px color-mix(in srgb, var(--stripe) 60%, transparent); }
+  .filters { display: flex; gap: 6px; padding: 10px 14px 0; overflow-x: auto; scrollbar-width: none; }
+  .filters button { flex: none; border: 1px solid var(--line); background: rgba(255,255,255,.6); border-radius: 99px; padding: 3px 10px; font-size: 11.5px; cursor: pointer; color: var(--ink); white-space: nowrap; }
+  .filters button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  .filters button.t { background: var(--chip-bg); border-color: transparent; color: var(--chip-fg); }
+  .filters button.t[aria-pressed="true"] { background: var(--chip-fg); color: #fff; }
+  .filters small { opacity: .7; margin-left: 3px; font-variant-numeric: tabular-nums; }
+
+  .p-list { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; min-height: 110px; }
+  .card { background: #fff; border-left: 3px solid var(--stripe); padding: 9px 12px 10px; position: relative; cursor: pointer;
+          box-shadow: 0 1px 2px rgba(0,0,0,.05); transition: background .15s, border-color .15s; display: flex; flex-direction: column; gap: 6px; }
+  .card:hover, .card:focus-visible { background: color-mix(in srgb, var(--paper) 55%, #fff); border-left-color: var(--ink); outline: none; }
+  .c-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 22px; }
+  .c-left { display: flex; align-items: center; gap: 4px; min-width: 0; }
+  .grip { border: 0; background: none; color: color-mix(in srgb, var(--accent) 65%, #fff); cursor: grab; padding: 2px 3px; border-radius: 4px; font-size: 13px; line-height: 1; touch-action: none; }
+  .grip:hover, .grip:focus-visible { color: var(--ink); background: color-mix(in srgb, var(--hl) 45%, #fff); }
+  .grip:active { cursor: grabbing; }
+  .card.dragging { z-index: 2; border-left-color: var(--ink); box-shadow: 0 10px 24px rgba(47,39,29,.22); transform: scale(1.015); background: #fff; }
+  .chip { border: 0; background: var(--chip-bg); color: var(--chip-fg); border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 500; cursor: pointer; white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+  .chip:hover { box-shadow: inset 0 0 0 1px var(--chip-fg); }
+  .acts { display: flex; gap: 2px; }
+  .acts button { border: 0; background: none; color: color-mix(in srgb, var(--accent) 70%, #fff); cursor: pointer; font-size: 13px; padding: 2px 5px; border-radius: 4px; line-height: 1.2; }
+  .acts button:hover { color: var(--ink); background: color-mix(in srgb, var(--hl) 45%, #fff); }
+  .acts button.del:hover { color: var(--full); background: var(--full-bg); }
+  .card p { margin: 0; line-height: 1.7; font-size: 13px; white-space: pre-wrap; word-break: break-word;
+            display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
+  .card p::before { content: "“"; color: var(--stripe); font-size: 17px; font-weight: 700; margin-right: 3px; }
+  .memo { font-size: 12px; color: #574a3a; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+  .meta { font-size: 11px; color: var(--accent); }
+  .toast { position: absolute; right: 10px; bottom: 8px; font-size: 11px; color: var(--ok); font-weight: 700; pointer-events: none; background: #fff; padding-left: 4px; }
+  .toast.err { color: var(--full); }
+  .crop { position: relative; overflow: hidden; max-width: 100%; background: #eee8dc; }
+  .crop img { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none; pointer-events: none; }
+  .crop.broken { display: grid; place-items: center; aspect-ratio: 16 / 9; width: 100%; font-size: 12px; color: var(--accent); }
+  .crop.editable { cursor: grab; touch-action: none; outline: 2px dashed var(--stripe); outline-offset: -2px; }
+
+  .card.editing { cursor: default; border-left-color: var(--ink); gap: 8px; }
+  .card.editing:hover { background: #fff; }
+  .field { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; color: var(--accent); font-weight: 500; }
+  .field select, .field input { border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; font-size: 13px; color: var(--ink); background: #fff; font-weight: 400; }
+  .rec { font-size: 11px; color: var(--accent); font-weight: 400; }
+  .rt-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+  .fmt-bar { display: flex; gap: 3px; }
+  .fmt-btn { width: 24px; height: 22px; border: 1px solid var(--line); background: #fff; border-radius: 4px; cursor: pointer; font-size: 12px; color: var(--ink); padding: 0; }
+  .fmt-btn b { font-weight: 700; }
+  .fmt-btn i { font-family: Georgia, "Times New Roman", serif; font-size: 13px; }
+  .fmt-btn:hover { border-color: var(--accent); }
+  .fmt-btn[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .rt { border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; font-size: 13px; color: var(--ink); background: #fff; font-weight: 400;
+        min-height: 64px; max-height: 180px; overflow-y: auto; line-height: 1.6; white-space: pre-wrap; word-break: break-word; position: relative; }
+  .rt.small { min-height: 40px; font-size: 12.5px; }
+  .rt:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+  .rt b, .card p b, .memo b { font-weight: 700; }
+  .rt u, .card p u, .memo u { text-underline-offset: 3px; }
+  .rt.empty::before { content: attr(data-placeholder); color: #a89c8a; position: absolute; pointer-events: none; }
+  .crop-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: 11.5px; color: var(--accent); }
+  .ratios { display: flex; gap: 4px; flex-wrap: wrap; }
+  .ratios button { border: 1px solid var(--line); background: #fff; border-radius: 4px; padding: 2px 8px; font-size: 11.5px; cursor: pointer; }
+  .ratios button[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .zoom { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 140px; }
+  .zoom input { flex: 1; min-width: 60px; accent-color: var(--accent); }
+  .crop-tools .reset { border: 0; background: none; color: var(--accent); text-decoration: underline; cursor: pointer; font-size: 11.5px; padding: 0; }
+  .e-err { font-size: 11.5px; color: var(--full); }
+  .e-acts { display: flex; justify-content: flex-end; gap: 6px; }
+  .e-acts button { border: 1px solid var(--line); background: #fff; border-radius: 4px; padding: 4px 12px; font-size: 12px; cursor: pointer; }
+  .e-acts button.primary { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+  .empty { text-align: center; color: var(--accent); line-height: 1.8; padding: 24px 8px; font-size: 13px; }
+  .empty b { color: var(--ink); }
+  .p-ft { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; font-size: 12px; color: var(--accent); border-top: 1px dashed color-mix(in srgb, var(--stripe) 70%, transparent); }
+  .p-ft button { border: 0; background: none; color: var(--accent); cursor: pointer; padding: 2px 4px; font-size: 12px; }
+  .p-ft button:hover { color: var(--full); }
+  /* 버전·브랜딩 */
+  .ver { font-size: 10px; font-weight: 500; color: var(--accent); background: color-mix(in srgb, var(--stripe) 18%, #fff); border-radius: 4px; padding: 1px 5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .brand { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 16px 10px; font-size: 11px; color: var(--accent); border-top: 1px solid var(--line); background: color-mix(in srgb, var(--paper) 60%, #fff); }
+  .brand b { color: var(--ink); font-weight: 700; }
+  .brand .mail { display: flex; align-items: center; gap: 4px; min-width: 0; }
+  .brand a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand a:hover { color: var(--ink); }
+  .brand button { border: 1px solid var(--line); background: #fff; border-radius: 4px; padding: 0 5px; font-size: 10.5px; color: var(--accent); cursor: pointer; line-height: 1.6; }
+  /* 백업·되돌리기 */
+  .ft-left { display: flex; gap: 6px; }
+  .snack { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 14px 10px; padding: 8px 10px 8px 12px;
+           background: var(--ink); color: #fbf7ef; border-radius: 6px; font-size: 12px; line-height: 1.45; box-shadow: 0 6px 16px rgba(47,39,29,.22); }
+  .snack button { flex: none; border: 1px solid rgba(251,247,239,.5); background: none; color: #fde68a; border-radius: 4px; padding: 2px 9px; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .snack button:hover { background: rgba(251,247,239,.12); }
+  .mail-btn { border: 0; background: none; padding: 0; font-size: 11px; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+  .mail-btn:hover { color: var(--ink); }
+  body.as-page { margin: 32px auto; border-radius: 8px; box-shadow: 0 12px 40px rgba(47,39,29,.18); overflow: hidden; }
+  html:has(body.as-page) { background: #ebe5d8; }
+  .confirm { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 14px; background: var(--full-bg); border-top: 1px solid #e9c9a8; font-size: 12px; color: #7a2e12; }
+  .confirm div { display: flex; gap: 6px; }
+  .confirm button { border: 1px solid #e0c3a3; background: #fff; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 12px; }
+  .confirm button.danger { background: var(--full); border-color: var(--full); color: #fff; }
+</style>
+</head>
+<body>
+  <div class="p-hd">
+    <div class="p-title">
+      <h1>내 문장 모음</h1>
+      <span class="ver" id="ver">v2.0.0</span>
+      <div class="seg" id="typeSeg" role="radiogroup" aria-label="종류별 보기">
+        <button type="button" role="radio" data-type="all" aria-checked="true">전체</button>
+        <button type="button" role="radio" data-type="text" aria-checked="false">글</button>
+        <button type="button" role="radio" data-type="image" aria-checked="false">그림</button>
+      </div>
+    </div>
+    <div class="p-right">
+      <span class="cnt" id="cnt">0 / 50</span>
+      <div class="tone-wrap">
+        <button type="button" class="tone" id="toneBtn" aria-haspopup="true" aria-expanded="false" aria-controls="tonePop" aria-label="색상 바꾸기" title="색상 바꾸기"></button>
+        <div class="tone-pop" id="tonePop" hidden><div class="swatches" id="swatches" role="radiogroup" aria-label="색상 고르기"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="notice" id="notice" hidden>50개가 가득 찼어요.<br>안 쓰는 카드를 ✕로 지우면 다시 저장돼요.</div>
+  <div class="search" id="searchWrap" hidden>
+    <svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    <input type="search" id="q" placeholder="글·메모·주제·사이트 검색  ( / )" aria-label="저장한 카드 검색" autocomplete="off" spellcheck="false">
+    <span class="s-count" id="qCount" aria-live="polite"></span>
+  </div>
+  <div class="filters" id="filters" role="toolbar" aria-label="주제별 보기" hidden></div>
+  <div class="p-list" id="plist"></div>
+  <div class="snack" id="snack" role="status" aria-live="polite" hidden><span id="snackText"></span><button type="button" id="snackBtn" hidden>되돌리기</button></div>
+  <div class="p-ft">
+    <div class="ft-left">
+      <button type="button" id="exportBtn" title="모은 카드를 파일(.json)로 저장해요">⤓ 백업</button>
+      <button type="button" id="importBtn" title="백업 파일에서 카드를 불러와요">⤒ 불러오기</button>
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+    </div>
+    <button type="button" id="clearAll">모두 지우기</button>
+  </div>
+  <div class="confirm" id="confirm" hidden>
+    <span>모두 지울까요? 되돌릴 수 없어요.</span>
+    <div><button type="button" id="cCancel">취소</button><button type="button" class="danger" id="cOk">지우기</button></div>
+  </div>
+  <div class="brand" id="brand">
+    <span>© <span id="year">2026</span> <b>내 문장 모음</b></span>
+    <button type="button" class="mail-btn" id="mailBtn" title="메일 앱에서 문의 메일 쓰기">✉ 이메일 문의</button>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

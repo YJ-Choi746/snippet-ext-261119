@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "내 문장 모음",
+  "version": "2.1.0",
+  "description": "웹페이지에서 드래그한 문장과 이미지를 우클릭으로 저장하고, 카드를 눌러 바로 복사합니다. 주제 자동 추천·검색·편집 지원 (최대 50개, 내 크롬 안에만 저장)",
+  "permissions": ["contextMenus", "storage"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "내 문장 모음",
+    "default_popup": "popup.html"
+  }
+}
