@@ -2,6 +2,8 @@
 
 ‘내 문장 모음’ 개발자(이하 “개발자”)는 크롬 확장 프로그램 ‘내 문장 모음’(이하 “확장 프로그램”)을 이용하는 정보주체의 자유와 권리를 보호하기 위해 「개인정보 보호법」 및 관계 법령을 지키며, 개인정보를 적법하게 처리하고 안전하게 관리합니다. 이에 「개인정보 보호법」 제30조에 따라 확장 프로그램이 개인정보를 어떻게 처리하는지 알리고, 관련 고충을 빠르게 처리하기 위해 다음과 같이 개인정보 처리방침을 수립·공개합니다.
 
+> English version: [Privacy Policy (English)](#privacy-policy-english)
+
 > **한눈에 보기**: 확장 프로그램은 사용자가 직접 저장한 문장·그림 주소 등을 **사용자 기기의 크롬 안에만** 보관합니다. 개발자는 이 정보를 받거나 보관하지 않으며, 누구에게도 제공하지 않습니다. 회원가입, 광고, 분석 도구, 쿠키가 없습니다.
 
 ## 목차
@@ -102,3 +104,61 @@
 3. 이전 개인정보 처리방침과 바뀐 내용은 아래에서 확인할 수 있습니다.
    - 변경 기록 전체: https://github.com/YJ-Choi746/snippet-ext-261119/commits/main/PRIVACY.md
    - 2026. 11. 19. 처음 게시한 처리방침(같은 날 위 내용으로 보완되어, 실제 적용 기간은 2026. 11. 19. 하루)
+
+---
+
+## Privacy Policy (English)
+
+This privacy policy explains how the Chrome extension “내 문장 모음 (My Sentence Collection)” (the “extension”) handles information. The Korean version above is the original; this English version has the same content.
+
+**Effective date:** November 19, 2026
+
+### Summary
+Everything you save stays **in your own Chrome browser on your device**. The developer never receives, stores, sells, or shares it. There are no accounts, ads, analytics, cookies, or tracking.
+
+### 1. What the extension handles and why
+The extension only creates the data below when you choose “Save” from the right-click menu or edit a card, and only to let you collect, organize, and copy your own clippings. It is the minimum needed for that purpose. It does not ask for your name, email, phone number, or any other identifier.
+
+| When | Data |
+|---|---|
+| When you save | The text you selected, the image address (URL — the image file itself is not saved), the page address it came from, and the time |
+| When you edit | Your notes, topics, text formatting, image crop settings, and card order |
+| Settings | Color theme, and words learned from topics you corrected (used for topic suggestions on your device) |
+
+### 2. Where it is stored and for how long
+- Stored locally in your browser (`chrome.storage.local`) until you delete it or uninstall the extension. It is not synced to other devices.
+- The developer does not receive or keep any copy.
+
+### 3. Deleting your data
+- Delete a card with ✕, or everything with “모두 지우기 (Delete all)”. An undo button is shown for 6 seconds.
+- Uninstalling the extension removes all of its stored data.
+- Backup files you export with “⤓ 백업 (Backup)” are files on your computer; delete them yourself if needed.
+
+### 4. Sharing, transfers, and third parties
+- No data is sent to the developer or any third party, sold, or used for advertising, profiling, or automated decisions. No processing is outsourced, and no data is transferred to other countries.
+- Image previews: when a saved image card is shown, your browser loads the image from the website it came from. That website may see a normal web request for the image, but the extension sends no other saved data with it and no referrer (`no-referrer`).
+
+### 5. Security
+- No network transmission of saved data; no external servers, remote code, or third-party libraries.
+- Only two permissions: `contextMenus` (the “Save” items in the right-click menu) and `storage` (local storage). No host permissions or content scripts — the extension does not read website content.
+- Saved and imported content is cleaned so that only bold, italic, underline, and line breaks remain; invalid backup files are rejected.
+
+### 6. Your rights
+Because all data is on your device, you can exercise your rights directly in the extension at any time:
+- **Access:** open the popup from the “ toolbar icon
+- **Correct:** edit a card with ✎
+- **Delete:** ✕ or “Delete all”
+- **Restrict / object:** turn off or remove the extension at `chrome://extensions`
+- **Portability:** export a copy with “⤓ Backup”
+
+If you are in the EU/EEA or the UK, you may also lodge a complaint with your local data protection authority. In Korea, see the agencies listed in section 12 above.
+
+### 7. Children
+The extension is not directed to children and does not knowingly collect personal information from anyone, including children under 13 (or under 14 in Korea).
+
+### 8. Contact
+Developer of “내 문장 모음” (GitHub: YJ-Choi746) — https://github.com/YJ-Choi746/snippet-ext-261119/issues
+
+### 9. Changes
+If this policy changes, we will update this document and its effective date, and explain important changes with a before/after comparison. Previous versions: https://github.com/YJ-Choi746/snippet-ext-261119/commits/main/PRIVACY.md
+
